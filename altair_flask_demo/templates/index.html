@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Altair Flask Demo</title>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+
+</head>
+<body>
+
+<form id="settings" method="post" action="/">
+    <table>
+        <tr>
+            <td>
+                <label>Number of data points: </label>
+            </td>
+            <td>
+                <input type="range" min="100" max="500" value="200" class="slider"
+                       name="n_points" oninput="this.nextElementSibling.value = this.value">
+                <output>200</output>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <label>Max bins: </label>
+            </td>
+            <td>
+                <input type="range" min="10" max="100" value="30" class="slider"
+                       name="max_bins" oninput="this.nextElementSibling.value = this.value">
+                <output>30</output>
+            </td>
+        </tr>
+    </table>
+    <div>
+        <input type="submit" value="Show" name="Show"/>
+    </div>
+</form>
+
+<script>
+    // change the plot on each input change
+    $('#settings input').each(function () {
+        $(this).on('change', showSubmit);
+    });
+
+    // function invoking a POST request with plot parameters
+    function showSubmit(ev) {
+        ev.preventDefault();
+        $.ajax({
+            method: 'POST',
+            url: {{ url_for('build_plot') | tojson }},
+            data: $('#settings').serialize()
+        }).done(showPlot);
+    }
+
+    // callback after the POST request
+    function showPlot(data) {
+        // parse the json figure and show it on the page
+        vegaEmbed('#vis', JSON.parse(data));
+    }
+
+    // invoke plotting by clicking Show button
+    $('#settings').on('submit', showSubmit);
+
+    // invoke initial plotting when the page is loaded
+    $('#settings').submit()
+</script>
+
+<div id="vis"></div>
+
+
+</body>
+</html>
